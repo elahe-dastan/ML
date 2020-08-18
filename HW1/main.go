@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"gonum.org/v1/plot/plotter"
 	"gonum.org/v1/plot/vg"
 	"io/ioutil"
@@ -18,7 +19,7 @@ func main() {
 	//points := reformatLinesToScatterPoints(lines)
 	//show(points)
 	pts := reformatLinesToPoints(lines)
-	linearRegression(pts, 1, 0.5, 1000)
+	fmt.Println(nonLinearRegression(pts, 5, 0.5, 3000, 0.01))
 }
 
 // Read data from csv file and return lines
@@ -131,43 +132,59 @@ func linearRegression(dataset []Point, degree int, learningRate float64, steps i
 	}
 }
 
-func nonLinearRegression(dataset []Point, degree int, learningRate float64, steps int) {
+// returns MSE error
+func nonLinearRegression(dataset []Point, degree int, learningRate float64, steps int, lambda float64) float64 {
 	coefficients := make([]float64, degree + 1)
 	for i := range coefficients {
 		coefficients[i] = 1
 	}
 
 	for i := 0; i < steps; i++ {
-		deriv := nonLinearDerivative(dataset, coefficients)
+		deriv := nonLinearDerivative(dataset, coefficients, lambda)
 		for j := range coefficients {
 			coefficients[j] -= deriv[j] * learningRate
 		}
 	}
 
-	// Plot the line
-	lineData := plotter.XYs{plotter.XY{X: 1, Y: m + b}, plotter.XY{X: 2, Y: 2 * m + b}}
+	// Plot the function
 	p, err := plot.New()
 	if err != nil {
 		panic(err)
 	}
-	p.Title.Text = "Points Example"
+	p.Title.Text = "functions"
 	p.X.Label.Text = "X"
 	p.Y.Label.Text = "Y"
 
-	l, err := plotter.NewLine(lineData)
-	if err != nil {
-		panic(err)
-	}
+	l := plotter.NewFunction(func(x float64) float64 {
+		fixedPart := float64(0)
+		for i, c := range coefficients {
+			fixedPart += c * math.Pow(x, float64(i))
+		}
+
+		return fixedPart
+	})
 
 	p.Add(l)
-	p.Legend.Add("line", l)
+	p.Legend.Add("function", l)
 
-	if err := p.Save(4*vg.Inch, 4*vg.Inch, "line.png"); err != nil {
+	if err := p.Save(4*vg.Inch, 4*vg.Inch, "nonlinear.png"); err != nil {
 		panic(err)
 	}
+
+	// return MSE
+	squredError := float64(0)
+	for _, d := range dataset {
+		estimatedY := float64(0)
+		for i, c := range coefficients {
+			estimatedY += c * math.Pow(d.X, float64(i))
+		}
+		squredError += math.Pow(d.Y - estimatedY, float64(2))
+	}
+
+	return squredError / float64(len(dataset))
 }
 
-func nonLinearDerivative(dataset []Point, coefficients []float64) []float64 {
+func nonLinearDerivative(dataset []Point, coefficients []float64, lambda float64) []float64 {
 	n := float64(len(dataset))
 	sigma := make([]float64, len(coefficients))
 
@@ -189,7 +206,11 @@ func nonLinearDerivative(dataset []Point, coefficients []float64) []float64 {
 	res := make([]float64, len(coefficients))
 
 	for i, s := range sigma{
-		res[i] = s/n
+		if i == 0 {
+			res[i] = s/n
+		}else {
+			res[i] = (s + 2 * lambda * coefficients[i])/n
+		}
 	}
 
 	return res
