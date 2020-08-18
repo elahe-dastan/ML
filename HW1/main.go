@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"github.com/gonum/matrix/mat64"
 	"gonum.org/v1/plot/plotter"
 	"gonum.org/v1/plot/vg"
 	"io/ioutil"
@@ -19,7 +19,8 @@ func main() {
 	//points := reformatLinesToScatterPoints(lines)
 	//show(points)
 	pts := reformatLinesToPoints(lines)
-	fmt.Println(nonLinearRegression(pts, 5, 0.5, 3000, 0.01))
+	normalEquation(pts, 3)
+	//fmt.Println(nonLinearRegression(pts, 5, 0.5, 3000, 0.01))
 }
 
 // Read data from csv file and return lines
@@ -228,4 +229,34 @@ func derivative(dataset []Point, m float64, b float64) (float64, float64) {
 	}
 
 	return sigma_m / n, sigma_b / n
+}
+
+func normalEquation(dataset []Point, degree int) {
+	//independentVariableMatrix := make([][]float64, len(dataset))
+	//
+	//for i, d := range dataset{
+	//	row := make([]float64, degree + 1)
+	//	for j := 0; j <= degree; j++ {
+	//		row[j] = math.Pow(d.X, float64(j))
+	//	}
+	//	independentVariableMatrix[i] = row
+	//}
+	//
+	//dependentVariableMatrix := make([][]float64, len(dataset))
+
+	independentVariableMatrix := mat64.NewDense(len(dataset), degree + 1, nil)
+	for i, d := range dataset {
+		for j := 0; j <= degree; j++ {
+			independentVariableMatrix.Set(i, j, math.Pow(d.X, float64(j)))
+		}
+	}
+
+	dependentVariableMatrix := mat64.NewDense(len(dataset),1, nil)
+	for i, d := range dataset {
+		dependentVariableMatrix.Set(i, 0, d.Y)
+	}
+
+	transpose := independentVariableMatrix.T()
+	//fmt.Printf("m :\n%v\n\n", mat64.Formatted(dependentVariableMatrix, mat64.Prefix(" "), mat64.Excerpt(2)))
+
 }
