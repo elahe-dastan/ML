@@ -5,6 +5,7 @@ import (
 	"gonum.org/v1/plot/vg"
 	"io/ioutil"
 	"log"
+	"math"
 	"os"
 	"strconv"
 	"strings"
@@ -14,8 +15,10 @@ import (
 
 func main() {
 	lines := ReadCSVData("/home/raha/go/src/ML/HW1/dataset.csv")
-	points := reformatLinesToScatterPoints(lines)
-	show(points)
+	//points := reformatLinesToScatterPoints(lines)
+	//show(points)
+	pts := reformatLinesToPoints(lines)
+	linearRegression(pts, 1, 0.5, 1000)
 }
 
 // Read data from csv file and return lines
@@ -41,6 +44,19 @@ func ReadCSVData(path string) []string {
 
 func reformatLinesToScatterPoints(lines []string) plotter.XYs {
 	pts := make(plotter.XYs, len(lines))
+
+	for i := range lines {
+		XY := strings.Split(lines[i], ",")
+
+		pts[i].X, _ = strconv.ParseFloat(XY[0], 64)
+		pts[i].Y, _ = strconv.ParseFloat(XY[1], 64)
+	}
+
+	return pts
+}
+
+func reformatLinesToPoints(lines []string) []Point {
+	pts := make([]Point, len(lines))
 
 	for i := range lines {
 		XY := strings.Split(lines[i], ",")
@@ -80,7 +96,7 @@ type Point struct {
 	Y float64
 }
 
-func regression(dataset []Point, degree int, learningRate float64, steps int) {
+func linearRegression(dataset []Point, degree int, learningRate float64, steps int) {
 	//In the beginning I want to set a stochastic line
 	// Lets put m and b equal to one
 	m := float64(1)
@@ -92,7 +108,91 @@ func regression(dataset []Point, degree int, learningRate float64, steps int) {
 		b -= deriv_b * learningRate
 	}
 
-	
+	// Plot the line
+	lineData := plotter.XYs{plotter.XY{X: 1, Y: m + b}, plotter.XY{X: 2, Y: 2 * m + b}}
+	p, err := plot.New()
+	if err != nil {
+		panic(err)
+	}
+	p.Title.Text = "Points Example"
+	p.X.Label.Text = "X"
+	p.Y.Label.Text = "Y"
+
+	l, err := plotter.NewLine(lineData)
+	if err != nil {
+		panic(err)
+	}
+
+	p.Add(l)
+	p.Legend.Add("line", l)
+
+	if err := p.Save(4*vg.Inch, 4*vg.Inch, "line.png"); err != nil {
+		panic(err)
+	}
+}
+
+func nonLinearRegression(dataset []Point, degree int, learningRate float64, steps int) {
+	coefficients := make([]float64, degree + 1)
+	for i := range coefficients {
+		coefficients[i] = 1
+	}
+
+	for i := 0; i < steps; i++ {
+		deriv := nonLinearDerivative(dataset, coefficients)
+		for j := range coefficients {
+			coefficients[j] -= deriv[j] * learningRate
+		}
+	}
+
+	// Plot the line
+	lineData := plotter.XYs{plotter.XY{X: 1, Y: m + b}, plotter.XY{X: 2, Y: 2 * m + b}}
+	p, err := plot.New()
+	if err != nil {
+		panic(err)
+	}
+	p.Title.Text = "Points Example"
+	p.X.Label.Text = "X"
+	p.Y.Label.Text = "Y"
+
+	l, err := plotter.NewLine(lineData)
+	if err != nil {
+		panic(err)
+	}
+
+	p.Add(l)
+	p.Legend.Add("line", l)
+
+	if err := p.Save(4*vg.Inch, 4*vg.Inch, "line.png"); err != nil {
+		panic(err)
+	}
+}
+
+func nonLinearDerivative(dataset []Point, coefficients []float64) []float64 {
+	n := float64(len(dataset))
+	sigma := make([]float64, len(coefficients))
+
+	for i := range sigma {
+		sigma[i] = float64(0)
+	}
+
+	// hard
+	for _, d := range dataset {
+		fixedPart := float64(0)
+		for i, c := range coefficients {
+			fixedPart += c * math.Pow(d.X, float64(i))
+		}
+		for i, s := range sigma {
+			s += -2 * math.Pow(d.X, float64(i)) * (d.Y - fixedPart)
+		}
+	}
+
+	res := make([]float64, len(coefficients))
+
+	for i, s := range sigma{
+		res[i] = s/n
+	}
+
+	return res
 }
 
 // derivation with respect to m
