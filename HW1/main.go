@@ -13,12 +13,14 @@ import (
 )
 
 func main() {
-	show()
+	lines := ReadCSVData("/home/raha/go/src/ML/HW1/dataset.csv")
+	points := reformatLinesToScatterPoints(lines)
+	show(points)
 }
 
-// I want to read the data from dataset and plot it
-func show() {
-	f, err := os.Open("/home/raha/go/src/ML/HW1/dataset.csv")
+// Read data from csv file and return lines
+func ReadCSVData(path string) []string {
+	f, err := os.Open(path)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -32,8 +34,25 @@ func show() {
 
 	dataAsText := string(dataAsBytes)
 
-	points := strings.Split(dataAsText, "\n")[1:]
+	lines := strings.Split(dataAsText, "\n")[1:]
 
+	return lines
+}
+
+func reformatLinesToScatterPoints(lines []string) plotter.XYs {
+	pts := make(plotter.XYs, len(lines))
+
+	for i := range lines {
+		XY := strings.Split(lines[i], ",")
+
+		pts[i].X, _ = strconv.ParseFloat(XY[0], 64)
+		pts[i].Y, _ = strconv.ParseFloat(XY[1], 64)
+	}
+
+	return pts
+}
+
+func show(pts plotter.XYs) {
 	p, err := plot.New()
 	if err != nil {
 		log.Fatal(err)
@@ -42,8 +61,6 @@ func show() {
 	p.Title.Text = "ML dataset"
 	p.X.Label.Text = "X"
 	p.Y.Label.Text = "Y"
-
-	pts := reformatPoints(points)
 
 	s, err := plotter.NewScatter(pts)
 	if err != nil {
@@ -58,14 +75,36 @@ func show() {
 	}
 }
 
-func reformatPoints(points []string) plotter.XYs {
-	pts := make(plotter.XYs, len(points))
-	for i := range points {
-		XY := strings.Split(points[i], ",")
+type Point struct {
+	X float64
+	Y float64
+}
 
-		pts[i].X, _ = strconv.ParseFloat(XY[0], 64)
-		pts[i].Y, _ = strconv.ParseFloat(XY[1], 64)
+func regression(dataset []Point, degree int, learningRate float64, steps int) {
+	//In the beginning I want to set a stochastic line
+	// Lets put m and b equal to one
+	m := float64(1)
+	b := float64(1)
+
+	for i := 0; i < steps; i++ {
+		deriv_m, deriv_b := derivative(dataset, m, b)
+		m -= deriv_m * learningRate
+		b -= deriv_b * learningRate
 	}
 
-	return pts
+	
+}
+
+// derivation with respect to m
+func derivative(dataset []Point, m float64, b float64) (float64, float64) {
+	n := float64(len(dataset))
+
+	sigma_m := float64(0)
+	sigma_b := float64(0)
+	for _, d := range dataset {
+		sigma_m += -2 * d.X * (d.Y - (m * d.X + b))
+		sigma_b += -2 * (d.Y - (m * d.X + b))
+	}
+
+	return sigma_m / n, sigma_b / n
 }
