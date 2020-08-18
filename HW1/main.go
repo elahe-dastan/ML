@@ -257,6 +257,22 @@ func normalEquation(dataset []Point, degree int) {
 	}
 
 	transpose := independentVariableMatrix.T()
+
+	XTX := mat64.NewDense(degree + 1, degree + 1, nil)
+	XTX.Product(transpose, independentVariableMatrix)
+
+	inverse := mat64.NewDense(degree + 1, degree + 1, nil)
+	err := inverse.Inverse(XTX)
+	if err != nil {
+		log.Fatal(err)
+	}
+	inverseXT := mat64.NewDense(degree + 1, len(dataset), nil)
+	inverseXT.Product(inverse, transpose)
+
+	theta := mat64.NewDense(degree + 1, 1, nil)
+	theta.Product(inverseXT, dependentVariableMatrix)
+
 	//fmt.Printf("m :\n%v\n\n", mat64.Formatted(dependentVariableMatrix, mat64.Prefix(" "), mat64.Excerpt(2)))
 
+	// show data
 }
