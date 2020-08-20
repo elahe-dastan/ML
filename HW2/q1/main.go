@@ -4,14 +4,25 @@ import (
 	"ML/HW2/q1/model"
 	"ML/data"
 	"math"
+	"math/rand"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func main() {
 	lines := data.ReadCSVData("/home/raha/go/src/ML/HW2/q1/processed.cleveland.data")
 	persons := reformatLineToPerson(lines)
 
+	rand.Seed(time.Now().Unix())
+	rand.Shuffle(len(persons), func(i, j int) {
+		persons[i], persons[j] = persons[j], persons[i]
+	})
+
+	fraction := len(persons) * 2 / 3
+	trainigData := persons[:fraction]
+	testData := persons[fraction:]
+	
 }
 
 func knn(data []model.Person, query model.Person, k int) int {
