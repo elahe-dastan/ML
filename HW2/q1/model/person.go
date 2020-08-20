@@ -15,4 +15,5 @@ type Person struct {
 	Ca       float64
 	Thal     float64
 	Num      int
+	Info     []float64
 }
