@@ -1,13 +1,12 @@
 package main
 
 import (
+	"ML/data"
 	"github.com/gonum/matrix/mat64"
 	"gonum.org/v1/plot/plotter"
 	"gonum.org/v1/plot/vg"
-	"io/ioutil"
 	"log"
 	"math"
-	"os"
 	"strconv"
 	"strings"
 
@@ -15,46 +14,12 @@ import (
 )
 
 func main() {
-	lines := ReadCSVData("/home/raha/go/src/ML/HW1/dataset.csv")
+	lines := data.ReadCSVData("/home/raha/go/src/ML/HW1/dataset.csv")
 	//points := reformatLinesToScatterPoints(lines)
 	//show(points)
 	pts := reformatLinesToPoints(lines)
 	normalEquation(pts, 3)
 	//fmt.Println(nonLinearRegression(pts, 5, 0.5, 3000, 0.01))
-}
-
-// Read data from csv file and return lines
-func ReadCSVData(path string) []string {
-	f, err := os.Open(path)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	defer f.Close()
-
-	dataAsBytes, err := ioutil.ReadAll(f)
-	if err != nil {
-		log.Println(err)
-	}
-
-	dataAsText := string(dataAsBytes)
-
-	lines := strings.Split(dataAsText, "\n")[1:]
-
-	return lines
-}
-
-func reformatLinesToScatterPoints(lines []string) plotter.XYs {
-	pts := make(plotter.XYs, len(lines))
-
-	for i := range lines {
-		XY := strings.Split(lines[i], ",")
-
-		pts[i].X, _ = strconv.ParseFloat(XY[0], 64)
-		pts[i].Y, _ = strconv.ParseFloat(XY[1], 64)
-	}
-
-	return pts
 }
 
 func reformatLinesToPoints(lines []string) []Point {
@@ -68,29 +33,6 @@ func reformatLinesToPoints(lines []string) []Point {
 	}
 
 	return pts
-}
-
-func show(pts plotter.XYs) {
-	p, err := plot.New()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	p.Title.Text = "ML dataset"
-	p.X.Label.Text = "X"
-	p.Y.Label.Text = "Y"
-
-	s, err := plotter.NewScatter(pts)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	p.Add(s)
-	p.Legend.Add("scatter", s)
-
-	if err := p.Save(4*vg.Inch, 4*vg.Inch, "points.png"); err != nil {
-		panic(err)
-	}
 }
 
 type Point struct {
