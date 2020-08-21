@@ -3,6 +3,7 @@ package main
 import (
 	"ML/HW2/q1/model"
 	"ML/data"
+	"fmt"
 	"math"
 	"math/rand"
 	"strconv"
@@ -20,9 +21,20 @@ func main() {
 	})
 
 	fraction := len(persons) * 2 / 3
-	trainigData := persons[:fraction]
+	trainingData := persons[:fraction]
 	testData := persons[fraction:]
-	
+
+	confusionMatrix := make([][]int, 5)
+	for i := 0; i < len(confusionMatrix); i++ {
+		confusionMatrix[i] = make([]int, 5)
+	}
+
+	for _, training := range trainingData {
+		evaluatedLabel := knn(testData, training, 20)
+		confusionMatrix[training.Num][evaluatedLabel]++
+	}
+
+	fmt.Println(confusionMatrix)
 }
 
 func knn(data []model.Person, query model.Person, k int) int {
