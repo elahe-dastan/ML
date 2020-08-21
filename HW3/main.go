@@ -27,12 +27,11 @@ func main() {
 		}
 	}
 
-	sum := 0
-	for _, wine := range class1 {
-		sum += wine.Proline
-	}
+	diagrams1 := model.CalculateDiagram(class1)
+	//diagrams2 := model.CalculateDiagram(class2)
+	//diagrams3 := model.CalculateDiagram(class3)
 
-	mean := sum / len(class1)
+	probabilityOfClass1 := (len(class1) / len(wines)) *
 }
 
 func reformatLineToWine(lines []string) []model.Wine {
@@ -65,3 +64,4 @@ func reformatLineToWine(lines []string) []model.Wine {
 
 	return wines
 }
+
