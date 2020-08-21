@@ -118,12 +118,14 @@ func mode (persons []model.Person) int {
 	}
 
 	max := 0
+	label := 0
 
-	for _, v := range labels {
+	for i, v := range labels {
 		if v > max {
 			max = v
+			label = i
 		}
 	}
 
-	return max
+	return label
 }
