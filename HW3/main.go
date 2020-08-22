@@ -3,6 +3,7 @@ package main
 import (
 	"ML/HW3/model"
 	"ML/data"
+	"math"
 	"strconv"
 	"strings"
 )
@@ -31,7 +32,9 @@ func main() {
 	//diagrams2 := model.CalculateDiagram(class2)
 	//diagrams3 := model.CalculateDiagram(class3)
 
-	probabilityOfClass1 := (len(class1) / len(wines)) *
+	priorProbability := len(class1) / len(wines)
+
+
 }
 
 func reformatLineToWine(lines []string) []model.Wine {
@@ -65,3 +68,6 @@ func reformatLineToWine(lines []string) []model.Wine {
 	return wines
 }
 
+func likelihood(mean float64, variance float64, x float64) float64 {
+	return (1 / math.Sqrt(2 * math.Pi * variance)) * math.Pow(math.E, -1 * math.Pow(x - mean, 2) / (2 * variance))
+}

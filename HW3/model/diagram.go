@@ -3,8 +3,8 @@ package model
 import "math"
 
 type Diagram struct {
-	Mean      float64
-	Deviation float64
+	Mean     float64
+	Variance float64
 }
 
 func CalculateDiagram(wines []Wine) []Diagram {
@@ -21,7 +21,7 @@ func CalculateDiagram(wines []Wine) []Diagram {
 		for _, wine := range wines {
 			sd += math.Pow(wine.Info[i] - diagrams[i].Mean, 2)
 		}
-		diagrams[i].Deviation = math.Sqrt(sd / float64(len(wines)))
+		diagrams[i].Variance = sd / float64(len(wines))
 	}
 
 	return diagrams
