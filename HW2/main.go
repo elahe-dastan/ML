@@ -1,7 +1,7 @@
 package main
 
 import (
-	"ML/HW2/q1/model"
+	"ML/HW2/model"
 	"ML/data"
 	"fmt"
 	"math"
