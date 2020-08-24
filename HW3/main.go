@@ -3,6 +3,7 @@ package main
 import (
 	"ML/HW3/model"
 	"ML/data"
+	"fmt"
 	"math"
 	"strconv"
 	"strings"
@@ -28,13 +29,32 @@ func main() {
 		}
 	}
 
+	// for Test
+	testWine := model.Wine{
+		Info:            []float64{14.23,1.71,2.43,15.6,127,2.8,3.06,.28,2.29,5.64,1.04,3.92,1065},
+	}
+
 	diagrams1 := model.CalculateDiagram(class1)
-	//diagrams2 := model.CalculateDiagram(class2)
+	diagrams2 := model.CalculateDiagram(class2)
 	//diagrams3 := model.CalculateDiagram(class3)
 
-	priorProbability := len(class1) / len(wines)
+	probability1 := math.Log(float64(len(class1) / len(wines)))
 
+	for i, diagram := range diagrams1 {
+		probability1 += math.Log(likelihood(diagram.Mean, diagram.Variance, testWine.Info[i]))
+	}
 
+	probability2 := math.Log(float64(len(class2) / len(wines)))
+
+	for i, diagram := range diagrams2 {
+		probability2 += math.Log(likelihood(diagram.Mean, diagram.Variance, testWine.Info[i]))
+	}
+
+	if probability1 > probability2 {
+		fmt.Println(probability1)
+	}else {
+		fmt.Println(probability2)
+	}
 }
 
 func reformatLineToWine(lines []string) []model.Wine {
