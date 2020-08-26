@@ -1,27 +1,53 @@
 package main
 
 import (
-	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 )
 
 func main() {
-	// reading data
-	f, err := os.Open("/home/raha/go/src/ML/HW3/q2/train-images.idx3-ubyte")
+	// reading training set images
+	//f, err := os.Open("/home/raha/go/src/ML/HW3/q2/train-images.idx3-ubyte")
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	//
+	//defer f.Close()
+	//
+	//trainingSetImagesAsBytes, err := ioutil.ReadAll(f)
+	//if err != nil {
+	//	log.Println(err)
+	//}
+
+	fd, err := os.Open("/home/raha/go/src/ML/HW3/q2/train-labels.idx1-ubyte")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	defer f.Close()
+	defer fd.Close()
 
-	dataAsBytes, err := ioutil.ReadAll(f)
+	trainingSetLabelsAsBytes, err := ioutil.ReadAll(fd)
 	if err != nil {
 		log.Println(err)
 	}
 
-	fmt.Println(dataAsBytes[3])
+	// ONE VS ALL
+	// NUMBER 1 VS ALL NUMBERS
+	trainingSetForNumberOne := make([]int, 6000)
+
+	for i := 0; i < 6000; i++ {
+		if int(trainingSetLabelsAsBytes[i + 8]) == 1 {
+			trainingSetForNumberOne[i]++
+		}else {
+			trainingSetForNumberOne[i]--
+		}
+	}
+
+	// Pretend that we have a logistic regression result
+	
+
+	//fmt.Println(trainingSetImagesAsBytes[3])
 
 	//data := dataAsBytes[4:8]
 	//var a int32
