@@ -45,7 +45,6 @@ func main() {
 	}
 
 	// Pretend that we have a logistic regression result
-	
 
 	//fmt.Println(trainingSetImagesAsBytes[3])
 
